@@ -1,38 +1,24 @@
 import io.qameta.allure.Description;
 import io.qameta.allure.Step;
-import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import static io.restassured.RestAssured.*;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-public class CreateCourierTest {
+public class CreateCourierTest extends Client{
     private Courier courier;
     private Response response;
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
         courier = new Courier("roadtosuccess5", "1234");
-    }
-
-    @Step("Создать курьера")
-    public Response postCreateCourier(Courier courier) {
-        response = RestAssured.given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(courier)
-                .when()
-                .post("/api/v1/courier");
-        return response;
     }
 
     @Description("Создание курьера с обязательными полями")
     @Test
     public void createNewCourier() {
-        postCreateCourier(courier);
+        response = postCreateCourier(courier);
         response.then().assertThat().body("ok", equalTo(true))
                 .and()
                 .statusCode(201);
@@ -42,7 +28,7 @@ public class CreateCourierTest {
     @Test
     public void createDoubleCourier() {
         postCreateCourier(courier);
-        postCreateCourier(courier);
+        response = postCreateCourier(courier);
         response.then().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой."))
                 .and()
                 .statusCode(409);
@@ -71,20 +57,13 @@ public class CreateCourierTest {
 
     @After
     public void cleanUp() {
-        deleteCourier(courier);
+        deleteThisCourier(courier);
     }
 
     @Step("Удалить курьера")
-    public void deleteCourier(Courier courier) {
-        response = RestAssured.given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(courier)
-                .when()
-                .post("/api/v1/courier/login");
+    public void deleteThisCourier(Courier courier) {
+        response = postLoginCourier(courier);
         String id = response.jsonPath().getString("id");
-
-        given()
-                .delete("/api/v1/courier/" + id);
+        deleteCourier(id);
     }
 }
