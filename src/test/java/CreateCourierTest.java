@@ -6,19 +6,22 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.core.IsEqual.equalTo;
 
-public class CreateCourierTest extends Client{
+public class CreateCourierTest {
     private Courier courier;
     private Response response;
+    private Client client;
+
 
     @Before
     public void setUp() {
         courier = new Courier("roadtosuccess5", "1234");
+        client = new Client();
     }
 
     @Description("Создание курьера с обязательными полями")
     @Test
     public void createNewCourier() {
-        response = postCreateCourier(courier);
+        response = client.postCreateCourier(courier);
         response.then().assertThat().body("ok", equalTo(true))
                 .and()
                 .statusCode(201);
@@ -27,8 +30,8 @@ public class CreateCourierTest extends Client{
     @Description("Создание курьера с логином, который уже есть")
     @Test
     public void createDoubleCourier() {
-        postCreateCourier(courier);
-        response = postCreateCourier(courier);
+        client.postCreateCourier(courier);
+        response = client.postCreateCourier(courier);
         response.then().assertThat().body("message", equalTo("Этот логин уже используется. Попробуйте другой."))
                 .and()
                 .statusCode(409);
@@ -38,7 +41,7 @@ public class CreateCourierTest extends Client{
     @Description("Проверяет, что нельзя создать курьера, если одно из обязательных полей пустое")
     public void checkCourierCanNotBeCreatedWEmptyField() {
         courier.setPassword("");
-        response = postCreateCourier(courier);
+        response = client.postCreateCourier(courier);
         response.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
                 .and()
                 .statusCode(400);
@@ -49,7 +52,7 @@ public class CreateCourierTest extends Client{
     public void checkCourierCanNotBeCreatedWNoField() {
         Courier wrongCourier = new Courier();
         wrongCourier.setLogin("w10n6c0ur1er");
-        response = postCreateCourier(wrongCourier);
+        response = client.postCreateCourier(wrongCourier);
         response.then().assertThat().body("message", equalTo("Недостаточно данных для создания учетной записи"))
                 .and()
                 .statusCode(400);
@@ -62,8 +65,8 @@ public class CreateCourierTest extends Client{
 
     @Step("Удалить курьера")
     public void deleteThisCourier(Courier courier) {
-        response = postLoginCourier(courier);
+        response = client.postLoginCourier(courier);
         String id = response.jsonPath().getString("id");
-        deleteCourier(id);
+        client.deleteCourier(id);
     }
 }

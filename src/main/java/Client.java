@@ -2,7 +2,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import static io.restassured.RestAssured.given;
 
-public class Client extends Courier {
+public class Client {
     private static final String POST_CREATE_COURIER = "/api/v1/courier";
     private static final String POST_LOGIN_COURIER = "/api/v1/courier/login";
     private static final String DELETE_COURIER = "/api/v1/courier/";
